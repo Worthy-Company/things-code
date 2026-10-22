@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <title>Bookshelf</title>
+  <link rel="stylesheet" href="../css/theme.css">
+  <link rel="stylesheet" href="shelf.css">
+</head>
+<body>
+  <header>
+    <h1>Bookshelf</h1>
+    <p>A shelf of books.</p>
+    <p class="crumbs"><a href="../index.html">Home</a> · <a href="../setup.html">Settings</a></p>
+  </header>
+  <main>
+    <div id="status">Loading…</div>
+
+    <form id="add" hidden>
+      <label for="add-box">Add a book</label>
+      <input type="text" id="add-box" autocomplete="off" placeholder="Part of a title, or an ISBN">
+      <span class="save-msg" id="add-msg"></span>
+      <ul id="matches"></ul>
+    </form>
+
+    <div id="shelves"></div>
+  </main>
+
+  <script>window.GH_APP_ID = 'things';</script>
+  <script src="../js/github.js"></script>
+  <script src="../js/format.js"></script>
+  <script src="shelf.js"></script>
+</body>
+</html>
