@@ -124,18 +124,27 @@ function scheduleSearch() {
   searchTimer = setTimeout(() => search(text), 250);
 }
 
+// One Open Library search. `field` is "title" (the title alone) or "q" (everything: title, author, ...).
+async function findBooks(field, value) {
+  const url = `${openLibrary()}/search.json?${field}=${encodeURIComponent(value)}&limit=8&fields=key,title,author_name,isbn,cover_i`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Open Library said ' + res.status);
+  const data = await res.json();
+  // A book with no ISBN can't be recorded.
+  return (data.docs || []).filter(d => d.title && pickIsbn(d));
+}
+
 async function search(text) {
   const mine = ++searchCount;
   const looksLikeIsbn = /^[\d-]{10,17}$/.test(text);
-  const q = looksLikeIsbn ? 'isbn:' + text.replace(/-/g, '') : text;
-  const url = `${openLibrary()}/search.json?q=${encodeURIComponent(q)}&limit=8&fields=key,title,author_name,isbn,cover_i`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Open Library said ' + res.status);
-    const data = await res.json();
+    // A title search puts the book meant first; if it finds nothing (an author, half a title), search everything.
+    let docs = looksLikeIsbn
+      ? await findBooks('q', 'isbn:' + text.replace(/-/g, ''))
+      : await findBooks('title', text);
+    if (!looksLikeIsbn && !docs.length) docs = await findBooks('q', text);
     if (mine !== searchCount) return; // a newer search has taken over
-    // A book with no ISBN can't be recorded.
-    renderMatches((data.docs || []).filter(d => d.title && pickIsbn(d)));
+    renderMatches(docs);
     addMsg.textContent = '';
   } catch (err) {
     if (mine !== searchCount) return;

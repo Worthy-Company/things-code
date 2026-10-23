@@ -7,7 +7,7 @@
  * js/github.js). Test tooling only; it does not ship as part of the app.
  *
  * It answers GET /search.json?q=... with the books it was given whose title or
- * author contains every word of the query, in the shape Open Library uses
+ * author contains every word of the query (or ?title=..., whose title alone does), in the shape Open Library uses
  * ({ numFound, docs: [{ key, title, author_name, isbn, cover_i, ... }] }), and
  * any GET /b/... with a one-pixel picture, so a cover counts as loaded.
  *
@@ -31,10 +31,13 @@ export function startOpenLibraryStub({ books = [] }) {
     const cors = { 'Access-Control-Allow-Origin': '*' };
 
     if (url.pathname === '/search.json') {
+      // Like Open Library: q looks at the title and the author together, title looks at the title only.
+      // Results keep the order the books were given in, which stands for Open Library's own ranking.
+      const titleOnly = !url.searchParams.get('q') && url.searchParams.get('title');
       const words = (url.searchParams.get('q') || url.searchParams.get('title') || '')
         .toLowerCase().split(/\s+/).filter(Boolean);
       const docs = books.filter(b => {
-        const hay = [b.title, ...(b.author_name || [])].join(' ').toLowerCase();
+        const hay = (titleOnly ? [b.title] : [b.title, ...(b.author_name || [])]).join(' ').toLowerCase();
         return words.every(w => hay.includes(w));
       });
       const json = JSON.stringify({ numFound: docs.length, start: 0, docs });
