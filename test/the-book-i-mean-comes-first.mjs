@@ -29,10 +29,11 @@
  *
  * Usage: node things/test/the-book-i-mean-comes-first.mjs
  */
-import { startTest } from '../../test/harness.mjs';
+import { startTest } from '../../../platform/test/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
+import { THINGS_FOLDER } from './support/where.mjs';
 
-const SHELF_PAGE_PATH = `/things/`;
+const SHELF_PAGE_PATH = `/`;
 
 const WELL_KNOWN_BOOK = 'The Garden Almanac of Marigold Lane';
 const BOOK = 'Marigold\'s Story Collection';
@@ -54,6 +55,7 @@ async function main() {
   const t = await startTest({
     name: 'the-book-i-mean-comes-first',
     seed: (write) => { write('books.json', []); },
+    appDir: THINGS_FOLDER,
     pageGlobals: { OPEN_LIBRARY_BASE: library.url, OPEN_LIBRARY_COVERS_BASE: library.url },
     cleanup: [library.close]
   });

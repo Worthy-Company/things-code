@@ -40,7 +40,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { startTest } from '../../test/harness.mjs';
+import { startTest } from '../../../platform/test/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));

@@ -41,10 +41,11 @@
  *
  * Usage: node things/test/add-a-book-by-title.mjs
  */
-import { startTest } from '../../test/harness.mjs';
+import { startTest } from '../../../platform/test/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
+import { THINGS_FOLDER } from './support/where.mjs';
 
-const SHELF_PAGE_PATH = `/things/`;
+const SHELF_PAGE_PATH = `/`;
 
 const BOOK = 'The Wandering Moon';
 const AUTHOR = 'Ilsa Brightwater';
@@ -65,6 +66,7 @@ async function main() {
   const t = await startTest({
     name: 'add-a-book-by-title',
     seed: (write) => { write('books.json', []); },
+    appDir: THINGS_FOLDER,
     pageGlobals: { OPEN_LIBRARY_BASE: library.url, OPEN_LIBRARY_COVERS_BASE: library.url },
     cleanup: [library.close]
   });

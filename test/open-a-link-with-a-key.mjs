@@ -38,10 +38,11 @@
  *
  * Usage: node things/test/open-a-link-with-a-key.mjs
  */
-import { startTest } from '../../test/harness.mjs';
+import { startTest } from '../../../platform/test/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
+import { THINGS_FOLDER } from './support/where.mjs';
 
-const SHELF_PAGE_PATH = `/things/`;
+const SHELF_PAGE_PATH = `/`;
 
 // Obviously fictional, and not shaped like a real token.
 const KEY = 'fictional-key-7f3k9';
@@ -61,6 +62,7 @@ async function main() {
     },
     token: null, // a fresh browser: no key saved
     requireToken: KEY,
+    appDir: THINGS_FOLDER,
     pageGlobals: { OPEN_LIBRARY_BASE: library.url, OPEN_LIBRARY_COVERS_BASE: library.url },
     cleanup: [library.close]
   });
