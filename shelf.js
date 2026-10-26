@@ -96,6 +96,14 @@ function pickIsbn(doc) {
   return all.find(i => /^97[89]\d{10}$/.test(i)) || all[0] || '';
 }
 
+// The ISBN to show and record. A work's own list mixes the ISBNs of many editions (digital ones, gift
+// sets), so the edition Open Library ranks first for the search comes first; a work with no edition
+// data falls back to its list.
+function bestIsbn(doc) {
+  const edition = doc.editions && Array.isArray(doc.editions.docs) ? doc.editions.docs[0] : null;
+  return (edition && pickIsbn(edition)) || pickIsbn(doc);
+}
+
 function renderMatches(docs) {
   matchesEl.innerHTML = '';
   docs.forEach(doc => {
@@ -106,7 +114,7 @@ function renderMatches(docs) {
       ? `<img alt="" src="${escapeHtml(`${covers()}/b/id/${encodeURIComponent(doc.cover_i)}-S.jpg`)}">`
       : '<span class="nocover"></span>';
     const by = (doc.author_name || []).join(', ');
-    const isbn = pickIsbn(doc); // the one that would be saved, so what is seen is what is kept
+    const isbn = bestIsbn(doc); // the one that would be saved, so what is seen is what is kept
     btn.innerHTML = `${thumb}<span><span class="match-title">${escapeHtml(doc.title)}</span>` +
       `${by ? `<br><span class="match-author">${escapeHtml(by)}</span>` : ''}` +
       `${isbn ? `<br><span class="match-isbn">ISBN ${escapeHtml(isbn)}</span>` : ''}</span>`;
@@ -128,12 +136,12 @@ function scheduleSearch() {
 
 // One Open Library search. `field` is "title" (the title alone) or "q" (everything: title, author, ...).
 async function findBooks(field, value) {
-  const url = `${openLibrary()}/search.json?${field}=${encodeURIComponent(value)}&limit=8&fields=key,title,author_name,isbn,cover_i`;
+  const url = `${openLibrary()}/search.json?${field}=${encodeURIComponent(value)}&limit=8&fields=key,title,author_name,isbn,cover_i,editions,editions.isbn`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Open Library said ' + res.status);
   const data = await res.json();
   // A book with no ISBN can't be recorded.
-  return (data.docs || []).filter(d => d.title && pickIsbn(d));
+  return (data.docs || []).filter(d => d.title && bestIsbn(d));
 }
 
 async function search(text) {
@@ -160,7 +168,7 @@ async function search(text) {
 
 async function addBook(doc) {
   const settings = readSettings();
-  const isbn = pickIsbn(doc);
+  const isbn = bestIsbn(doc);
   searchCount++; // any search still on its way is no longer wanted
   clearTimeout(searchTimer);
   renderMatches([]);
