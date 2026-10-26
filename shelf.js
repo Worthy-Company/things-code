@@ -209,4 +209,10 @@ async function init() {
 
 addForm.addEventListener('submit', e => e.preventDefault());
 addBox.addEventListener('input', scheduleSearch);
+// The arrow keys move through the matches and Enter picks one (the platform's picker; a click works as it did).
+wirePicker({
+  inputEl: addBox,
+  listEl: matchesEl,
+  onClose: () => { searchCount++; clearTimeout(searchTimer); renderMatches([]); }
+});
 init();
