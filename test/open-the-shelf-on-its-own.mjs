@@ -28,8 +28,7 @@
  *
  * Deliberately not covered here: a wrong or expired key (see
  * open-a-link-with-a-key.mjs), and the real site (the test never goes online).
- * The local copy of the platform is the sibling folder GitHub/platform, as it
- * sits on Nate's disk.
+ * The local copy of the platform is found through support/where.mjs.
  *
  * The test only looks at what a person can see and do, plus what the page
  * asks for.
@@ -39,13 +38,10 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { startTest } from '../../../platform/test/harness.mjs';
+import { startTest } from './support/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
+import { THINGS_FOLDER as SHELF_FOLDER, PLATFORM_FOLDER } from './support/where.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const SHELF_FOLDER = path.resolve(here, '..');
-const PLATFORM_FOLDER = path.resolve(here, '..', '..', '..', 'platform');
 const PLATFORM_ADDRESS = 'https://platform.worthycompany.org/';
 
 // Obviously fictional, and not shaped like a real token.

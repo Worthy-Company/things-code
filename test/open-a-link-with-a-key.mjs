@@ -38,7 +38,7 @@
  *
  * Usage: node things/test/open-a-link-with-a-key.mjs
  */
-import { startTest } from '../../../platform/test/harness.mjs';
+import { startTest } from './support/harness.mjs';
 import { startOpenLibraryStub } from './support/open-library-stub-server.mjs';
 import { THINGS_FOLDER } from './support/where.mjs';
 
