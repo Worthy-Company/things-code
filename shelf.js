@@ -106,8 +106,10 @@ function renderMatches(docs) {
       ? `<img alt="" src="${escapeHtml(`${covers()}/b/id/${encodeURIComponent(doc.cover_i)}-S.jpg`)}">`
       : '<span class="nocover"></span>';
     const by = (doc.author_name || []).join(', ');
+    const isbn = pickIsbn(doc); // the one that would be saved, so what is seen is what is kept
     btn.innerHTML = `${thumb}<span><span class="match-title">${escapeHtml(doc.title)}</span>` +
-      `${by ? `<br><span class="match-author">${escapeHtml(by)}</span>` : ''}</span>`;
+      `${by ? `<br><span class="match-author">${escapeHtml(by)}</span>` : ''}` +
+      `${isbn ? `<br><span class="match-isbn">ISBN ${escapeHtml(isbn)}</span>` : ''}</span>`;
     btn.addEventListener('click', () => addBook(doc));
     li.appendChild(btn);
     matchesEl.appendChild(li);

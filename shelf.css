@@ -11,6 +11,7 @@
 #matches button:hover, #matches button:focus-visible { border-color: var(--accent); outline: none; }
 #matches img, #matches .nocover { width: 34px; height: 50px; object-fit: cover; flex: none; border-radius: 2px; background: var(--bg); }
 #matches .match-author { color: var(--muted); font-size: 0.8rem; }
+#matches .match-isbn { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.02em; }
 
 .shelf { display: flex; align-items: flex-end; gap: 14px; padding: 0 12px; min-height: 170px; }
 .board { height: 14px; background: linear-gradient(#6b4a2f, #4a321e); border-radius: 2px; box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5); margin-bottom: 2.2rem; }
