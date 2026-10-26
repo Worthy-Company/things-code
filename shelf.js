@@ -100,8 +100,22 @@ function pickIsbn(doc) {
 // sets), so the edition Open Library ranks first for the search comes first; a work with no edition
 // data falls back to its list.
 function bestIsbn(doc) {
+  if (doc.chosenIsbn) return doc.chosenIsbn; // the person typed the end of it
   const edition = doc.editions && Array.isArray(doc.editions.docs) ? doc.editions.docs[0] : null;
   return (edition && pickIsbn(edition)) || pickIsbn(doc);
+}
+
+// The edition whose ISBN ends in the digits the person typed, if the work has one. A 13-digit ISBN is
+// preferred over a 10-digit one.
+function isbnEndingIn(doc, digits) {
+  const fromEditions = ((doc.editions && doc.editions.docs) || []).flatMap(e => e.isbn || []);
+  const all = [...(doc.isbn || []), ...fromEditions].filter(i => i.endsWith(digits));
+  return all.find(i => /^97[89]\d{10}$/.test(i)) || all[0] || '';
+}
+
+// An ISBN as shown: its last four digits in bold, to compare with the book in hand at a glance.
+function isbnHtml(isbn) {
+  return escapeHtml(isbn.slice(0, -4)) + '<strong>' + escapeHtml(isbn.slice(-4)) + '</strong>';
 }
 
 function renderMatches(docs) {
@@ -117,7 +131,7 @@ function renderMatches(docs) {
     const isbn = bestIsbn(doc); // the one that would be saved, so what is seen is what is kept
     btn.innerHTML = `${thumb}<span><span class="match-title">${escapeHtml(doc.title)}</span>` +
       `${by ? `<br><span class="match-author">${escapeHtml(by)}</span>` : ''}` +
-      `${isbn ? `<br><span class="match-isbn">ISBN ${escapeHtml(isbn)}</span>` : ''}</span>`;
+      `${isbn ? `<br><span class="match-isbn">ISBN ${isbnHtml(isbn)}</span>` : ''}</span>`;
     btn.addEventListener('click', () => addBook(doc));
     li.appendChild(btn);
     matchesEl.appendChild(li);
@@ -130,13 +144,13 @@ let searchCount = 0;
 function scheduleSearch() {
   clearTimeout(searchTimer);
   const text = addBox.value.trim();
-  if (text.length < 3) { renderMatches([]); return; }
+  if (text.length < 3) { searchCount++; renderMatches([]); addMsg.textContent = ''; return; }
   searchTimer = setTimeout(() => search(text), 250);
 }
 
 // One Open Library search. `field` is "title" (the title alone) or "q" (everything: title, author, ...).
-async function findBooks(field, value) {
-  const url = `${openLibrary()}/search.json?${field}=${encodeURIComponent(value)}&limit=8&fields=key,title,author_name,isbn,cover_i,editions,editions.isbn`;
+async function findBooks(field, value, limit = 8) {
+  const url = `${openLibrary()}/search.json?${field}=${encodeURIComponent(value)}&limit=${limit}&fields=key,title,author_name,isbn,cover_i,editions,editions.isbn`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Open Library said ' + res.status);
   const data = await res.json();
@@ -147,15 +161,28 @@ async function findBooks(field, value) {
 async function search(text) {
   const mine = ++searchCount;
   const looksLikeIsbn = /^[\d-]{10,17}$/.test(text);
+  addMsg.textContent = 'Looking…';
+  addMsg.className = 'save-msg';
   try {
-    // A title search puts the book meant first; if it finds nothing (an author, half a title), search everything.
-    let docs = looksLikeIsbn
-      ? await findBooks('q', 'isbn:' + text.replace(/-/g, ''))
-      : await findBooks('title', text);
-    if (!looksLikeIsbn && !docs.length) docs = await findBooks('q', text);
+    let docs = [];
+    // A title followed by digits: the digits are the end of the ISBN on the book in hand, so look in the
+    // title's editions for the one ending in them. Many works share a title, so look further down.
+    const withDigits = !looksLikeIsbn && text.match(/^(.*\S)\s+(\d{3,12})$/);
+    if (withDigits) {
+      const found = await findBooks('title', withDigits[1], 40);
+      docs = found.map(d => ({ ...d, chosenIsbn: isbnEndingIn(d, withDigits[2]) })).filter(d => d.chosenIsbn);
+    }
+    // Otherwise (or if the digits were part of the title, as in "Apollo 13"): a title search puts the
+    // book meant first; if it finds nothing (an author, half a title), search everything.
+    if (!docs.length) {
+      docs = looksLikeIsbn
+        ? await findBooks('q', 'isbn:' + text.replace(/-/g, ''))
+        : await findBooks('title', text);
+      if (!looksLikeIsbn && !docs.length) docs = await findBooks('q', text);
+    }
     if (mine !== searchCount) return; // a newer search has taken over
     renderMatches(docs);
-    addMsg.textContent = '';
+    addMsg.textContent = docs.length ? '' : `No match for “${text}”. Try part of the title, or the ISBN.`;
   } catch (err) {
     if (mine !== searchCount) return;
     renderMatches([]);
@@ -223,6 +250,6 @@ addBox.addEventListener('input', scheduleSearch);
 wirePicker({
   inputEl: addBox,
   listEl: matchesEl,
-  onClose: () => { searchCount++; clearTimeout(searchTimer); renderMatches([]); }
+  onClose: () => { searchCount++; clearTimeout(searchTimer); renderMatches([]); addMsg.textContent = ''; }
 });
 init();

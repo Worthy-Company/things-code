@@ -25,7 +25,7 @@ const PIXEL = Buffer.from(
  * Start the stand-in on a free port. `books` are search results in Open
  * Library's shape. Returns { server, port, url, close() }.
  */
-export function startOpenLibraryStub({ books = [] }) {
+export function startOpenLibraryStub({ books = [], delayMs = 0 }) {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, 'http://localhost');
     const cors = { 'Access-Control-Allow-Origin': '*' };
@@ -41,8 +41,11 @@ export function startOpenLibraryStub({ books = [] }) {
         return words.every(w => hay.includes(w));
       });
       const json = JSON.stringify({ numFound: docs.length, start: 0, docs });
-      res.writeHead(200, { ...cors, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(json) });
-      return res.end(json);
+      // `delayMs` makes the stand-in slow to answer, as the real one sometimes is.
+      return setTimeout(() => {
+        res.writeHead(200, { ...cors, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(json) });
+        res.end(json);
+      }, delayMs);
     }
 
     if (url.pathname.startsWith('/b/')) {
