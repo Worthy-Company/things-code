@@ -1,0 +1,93 @@
+{
+  "actions": [
+    {
+      "id": "x7c1k4pe",
+      "approachId": "a8m3q5vd",
+      "title": "Add a book by typing part of its title",
+      "status": "done",
+      "outcome": "Built and tested on 22 October 2026 (things/test/add-a-book-by-title.mjs).",
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x3d8m2qa",
+      "approachId": "a8m3q5vd",
+      "title": "Open the page from a link that carries a key",
+      "status": "done",
+      "outcome": "Built and tested on 22 October 2026 (things/test/open-a-link-with-a-key.mjs). The key is kept apart from one the person entered.",
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x9f5t7ub",
+      "approachId": "a8m3q5vd",
+      "title": "Get GitHub Pages working so the sister can open the page",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x2k6r1vg",
+      "approachId": "a8m3q5vd",
+      "title": "Let a person type or paste a key into the page",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x8n4w3hc",
+      "approachId": "a8m3q5vd",
+      "title": "Choose the right edition when adding a book by title",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x5p7j9ze",
+      "approachId": "a8m3q5vd",
+      "title": "Click a book to see it larger and move through the shelf",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x1q3b6ys",
+      "approachId": "a8m3q5vd",
+      "title": "Pick books for a wishlist and send them in one request",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x6v2g8dm",
+      "approachId": "a8m3q5vd",
+      "title": "Show only available books on request",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x4h9c5nt",
+      "approachId": "a8m3q5vd",
+      "title": "Hide the add box from someone whose key can only read",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "x7s1f3kw",
+      "approachId": "a8m3q5vd",
+      "title": "Add a book by scanning its barcode, with a beep",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "y3m8z2qr",
+      "approachId": "a2w9h6rj",
+      "title": "Find out whether Little Free Library publishes its map as open data",
+      "status": "open",
+      "outcome": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    }
+  ],
+  "updatedAt": "2026-10-22T09:21:33.000Z"
+}

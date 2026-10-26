@@ -1,0 +1,19 @@
+{
+  "approaches": [
+    {
+      "id": "a8m3q5vd",
+      "goalId": "g4t7n2kx",
+      "title": "A shelf of books on a web page, shared with people I know",
+      "notes": null,
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    },
+    {
+      "id": "a2w9h6rj",
+      "goalId": "g4t7n2kx",
+      "title": "Hand things over near where people live",
+      "notes": "Little Free Libraries as the transfer mechanism; copies that move locally.",
+      "createdAt": "2026-10-22T09:21:33.000Z"
+    }
+  ],
+  "updatedAt": "2026-10-22T09:21:33.000Z"
+}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nate's bookshelf (sketch)</title>
+<!--
+  A SKETCH to look at, not the page. Throwaway: the real page will read the shelf from the community
+  repository and look books up in Open Library. Here the books are typed in, and only the covers come
+  from Open Library (by ISBN). Colours are the suite's theme values, copied for the sketch.
+  Delete this file when the real page exists.
+-->
+<style>
+  :root { --bg: #0f0f12; --surface: #1a1b1e; --text: #e4e4e7; --muted: #a1a1aa; --accent: #7c3aed;
+          --accent-dim: #5b21b6; --border: #2d2d35; --good: #4ade80; --board: #6b4a2f; --board-edge: #4a321e; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text);
+         line-height: 1.5; margin: 0; padding-bottom: 4rem; }
+  header { padding: 1.5rem 1.5rem 0.5rem; max-width: 980px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+  header p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.95rem; }
+  main { max-width: 980px; margin: 0 auto; padding: 1rem 1.5rem; }
+  button { font: inherit; cursor: pointer; }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 5px; padding: 0.45rem 0.9rem; font-size: 0.9rem; }
+  .btn:hover { background: var(--accent-dim); }
+  .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn.secondary:hover { color: var(--text); border-color: var(--muted); }
+  .btn.done { background: transparent; border: 1px solid var(--good); color: var(--good); }
+
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.5rem 0 1.25rem; flex-wrap: wrap; }
+  .bar label { color: var(--muted); font-size: 0.85rem; margin-right: 0.4rem; }
+  .bar select { background: var(--surface); border: 1px solid var(--border); color: var(--text);
+                border-radius: 5px; padding: 0.35rem 0.5rem; font-size: 0.9rem; }
+
+  /* A shelf: books stand on a board. */
+  .shelf { display: flex; align-items: flex-end; gap: 6px; padding: 0 12px; min-height: 160px; }
+  .board { height: 14px; background: linear-gradient(var(--board), var(--board-edge)); border-radius: 2px;
+           box-shadow: 0 6px 10px rgba(0,0,0,.5); margin-bottom: 2rem; }
+  .shelf-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 12px 0.4rem; }
+  .book { background: none; border: none; padding: 0; position: relative; transition: transform .12s; }
+  .book:hover, .book:focus-visible { transform: translateY(-8px); outline: none; }
+  .book:focus-visible img { outline: 2px solid var(--accent); }
+  .book img { display: block; height: 140px; width: auto; border-radius: 2px 4px 4px 2px; box-shadow: 2px 2px 6px rgba(0,0,0,.6); background: var(--surface); }
+  .book .plain { display: flex; align-items: center; justify-content: center; text-align: center; height: 140px; width: 95px;
+                 padding: 0.5rem; background: #2a2540; color: var(--text); font-size: 0.8rem; border-radius: 2px 4px 4px 2px; }
+  .book.out img, .book.out .plain { opacity: .4; }
+  .book.back::after { content: ""; position: absolute; right: -2px; top: -6px; width: 12px; height: 12px; border-radius: 50%;
+                      background: var(--accent); border: 2px solid var(--bg); }
+
+  /* The book pulled out. */
+  #pulled { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none; align-items: center; justify-content: center; padding: 1rem; }
+  #pulled.open { display: flex; }
+  .pane { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; max-width: 640px; width: 100%;
+          display: flex; gap: 1.5rem; padding: 1.5rem; align-items: flex-start; position: relative; }
+  .pane img { display: block; width: 200px; height: auto; max-height: 300px; object-fit: contain; border-radius: 3px; box-shadow: 3px 3px 10px rgba(0,0,0,.6); flex: none; background: none; }
+  .pane .plain { display: flex; align-items: center; justify-content: center; width: 200px; min-height: 280px; background: #2a2540; padding: 1rem; text-align: center; border-radius: 3px; flex: none; }
+  .pane h2 { margin: 0; font-size: 1.3rem; }
+  .pane .by { color: var(--muted); margin: 0.2rem 0 1rem; }
+  .pane .marks { color: var(--muted); font-size: 0.9rem; margin: 0 0 1.25rem; }
+  .pane .marks b { color: var(--text); font-weight: 600; }
+  .pane .acts { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .step { position: absolute; top: 50%; transform: translateY(-50%); background: var(--surface); border: 1px solid var(--border);
+          color: var(--text); border-radius: 50%; width: 2.4rem; height: 2.4rem; font-size: 1.2rem; }
+  .step.prev { left: -1.2rem; } .step.next { right: -1.2rem; }
+  .close { position: absolute; top: 0.6rem; right: 0.8rem; background: none; border: none; color: var(--muted); font-size: 1.3rem; }
+
+  /* The wishlist. */
+  #wishlist { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; display: none; }
+  #wishlist.open { display: block; }
+  #wishlist h2 { margin: 0 0 0.5rem; font-size: 1rem; }
+  #wishlist ul { margin: 0 0 0.9rem; padding-left: 1.2rem; }
+  @media (max-width: 560px) { .pane { flex-direction: column; align-items: center; } .step.prev { left: -.4rem; } .step.next { right: -.4rem; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Nate's bookshelf</h1>
+  <p>Take a look. I'm still adding books, so check back. A purple dot means I'd like it back.</p>
+</header>
+<main>
+  <div class="bar">
+    <button class="btn secondary" id="avail">Show only available</button>
+    <button class="btn secondary" id="wishbtn">Wishlist (0)</button>
+  </div>
+  <div id="shelves"></div>
+  <section id="wishlist" aria-label="Your wishlist">
+    <h2>Your wishlist</h2>
+    <ul id="wishitems"></ul>
+    <button class="btn" id="send">Send</button>
+    <button class="btn secondary" id="wishclose">Close</button>
+  </section>
+</main>
+
+<div id="pulled" role="dialog" aria-modal="true" aria-label="A book">
+  <div class="pane">
+    <button class="close" aria-label="Close" id="x">×</button>
+    <button class="step prev" aria-label="Previous book" id="prev">‹</button>
+    <div id="cover"></div>
+    <div>
+      <h2 id="title"></h2>
+      <p class="by" id="author"></p>
+      <p class="marks" id="marks"></p>
+      <div class="acts"><button class="btn" id="want">Add to wishlist</button></div>
+    </div>
+    <button class="step next" aria-label="Next book" id="next">›</button>
+  </div>
+</div>
+
+<script>
+  // Typed in for the sketch: the real page reads these from the community repository.
+  var BOOKS = [
+    { isbn: '9780395389492', title: 'The Polar Express', author: 'Chris Van Allsburg' },
+    { isbn: '9780399247927', title: 'The Three Snow Bears', author: 'Jan Brett', out: true },
+    { isbn: '9780152051143', title: "Baby Bear's Chairs", author: 'Jane Yolen' },
+    { isbn: '9781402772191', title: "Richard Scarry's Best Busy Year Ever", author: 'Richard Scarry' },
+    { isbn: '9780811864954', title: 'Ivy + Bean Secret Treasure Box', author: 'Annie Barrows', note: 'Missing book 1.' },
+    { isbn: '9781534457041', title: "One Kid's Trash", author: 'Jamie Sumner' },
+    { isbn: '9781338266979', title: 'Nixie Makes Waves', author: 'Lisa Ann Scott' },
+    { isbn: '9781338311488', title: 'The Baby-Sitters Club Retro Set', author: 'Ann M. Martin', note: 'Missing book 1.' },
+    { isbn: '9781584761631', title: 'Build-A-Word', author: 'Nora Gaydos' },
+    { isbn: '9780578151465', title: "Lucinda's Magical Yoga Adventure", author: 'Betty Larrea' },
+    { isbn: '9781401962173', title: 'Tiger-Tiger, Is It True?', author: 'Byron Katie', back: true },
+    { isbn: '9781401911867', title: 'Unstoppable Me!', author: 'Wayne W. Dyer and Kristina Tracy', back: true },
+    { isbn: '9781934649503', title: 'Goodnight Brew', author: 'Karla Oceanak', back: true },
+    { isbn: '9780756655426', title: 'The Princess and the Frog: Essential Guide', author: 'Laura Gilbert', out: true }
+  ];
+  // `out` means not available right now. The sketch never says who has it.
+  var wished = {}, current = 0, onlyAvailable = false;
+  var shown = function () { return BOOKS.filter(function (b) { return !(onlyAvailable && b.out); }); };
+  var $ = function (id) { return document.getElementById(id); };
+  var coverUrl = function (b, size) { return 'https://covers.openlibrary.org/b/isbn/' + b.isbn + '-' + size + '.jpg?default=false'; };
+
+  // A cover, or the title on a plain spine when Open Library has none.
+  function cover(b, size, cls) {
+    var img = new Image();
+    img.alt = 'Cover of ' + b.title;
+    img.src = coverUrl(b, size);
+    img.onerror = function () {
+      var d = document.createElement('div'); d.className = 'plain'; d.textContent = b.title;
+      if (img.parentNode) img.parentNode.replaceChild(d, img);
+    };
+    return img;
+  }
+
+  function drawShelves() {
+    var host = $('shelves'); host.innerHTML = '';
+    var per = 5, list = shown();
+    for (var i = 0; i < list.length; i += per) {
+      var shelf = document.createElement('div'); shelf.className = 'shelf';
+      list.slice(i, i + per).forEach(function (b, k) {
+        var n = i + k; // this book's place, fixed now (i keeps moving on)
+        var btn = document.createElement('button');
+        btn.className = 'book' + (b.back ? ' back' : '') + (b.out ? ' out' : '');
+        btn.setAttribute('aria-label', b.title + ' by ' + b.author);
+        btn.appendChild(cover(b, 'M'));
+        btn.onclick = function () { open(n); };
+        shelf.appendChild(btn);
+      });
+      host.appendChild(shelf);
+      var board = document.createElement('div'); board.className = 'board'; host.appendChild(board);
+    }
+  }
+
+  function open(n) {
+    var list = shown();
+    current = (n + list.length) % list.length;
+    var b = list[current];
+    $('cover').innerHTML = ''; $('cover').appendChild(cover(b, 'L'));
+    $('title').textContent = b.title; $('author').textContent = b.author;
+    $('marks').innerHTML = (b.out ? '<b>Not available right now.</b> You can still add it to your wishlist.' : '<b>Available.</b>') +
+      (b.back ? ' I would like it back.' : '') + (b.note ? ' ' + b.note : '');
+    var on = wished[b.isbn];
+    $('want').textContent = on ? 'On your wishlist' : 'Add to wishlist';
+    $('want').className = 'btn' + (on ? ' done' : '');
+    $('pulled').className = 'open';
+    $('want').focus();
+  }
+
+  function drawWishlist() {
+    var chosen = BOOKS.filter(function (b) { return wished[b.isbn]; });
+    $('wishbtn').textContent = 'Wishlist (' + chosen.length + ')';
+    $('wishitems').innerHTML = chosen.map(function (b) { return '<li>' + b.title + ' <span style="color:var(--muted)">— ' + b.author + '</span></li>'; }).join('');
+  }
+
+  $('avail').onclick = function () {
+    onlyAvailable = !onlyAvailable;
+    $('avail').textContent = onlyAvailable ? 'Showing only available' : 'Show only available';
+    drawShelves();
+  };
+  $('want').onclick = function () { var b = shown()[current]; wished[b.isbn] = !wished[b.isbn]; open(current); drawWishlist(); };
+  $('prev').onclick = function () { open(current - 1); };
+  $('next').onclick = function () { open(current + 1); };
+  $('x').onclick = function () { $('pulled').className = ''; };
+  $('wishbtn').onclick = function () { $('wishlist').className = 'open'; };
+  $('wishclose').onclick = function () { $('wishlist').className = ''; };
+  $('send').onclick = function () { alert('The real page would send this wishlist to Nate.'); };
+  document.onkeydown = function (e) {
+    if (!$('pulled').classList.contains('open')) return;
+    if (e.key === 'Escape') $('pulled').className = '';
+    if (e.key === 'ArrowLeft') open(current - 1);
+    if (e.key === 'ArrowRight') open(current + 1);
+  };
+  drawShelves();
+</script>
+</body>
+</html>
